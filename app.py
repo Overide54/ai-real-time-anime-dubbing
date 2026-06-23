@@ -1,3 +1,4 @@
+import time
 from tts import text_to_speech
 from speech import transcribe
 from translator import translate
@@ -22,10 +23,10 @@ if audio_file:
 
     if st.button("Translate"):
 
-        # Create uploads folder
+        start_time = time.time()
+
         os.makedirs("uploads", exist_ok=True)
 
-        # Save uploaded file
         filepath = os.path.join(
             "uploads",
             audio_file.name
@@ -36,24 +37,33 @@ if audio_file:
 
         st.success("Audio Saved")
 
-        # Speech to Text
         with st.spinner("Transcribing Japanese Audio..."):
             text = transcribe(filepath)
 
-        # Translation
         with st.spinner("Translating to English..."):
             english_text = translate(text)
 
-        # Display Results
-                # Display Results
         st.subheader("Japanese Transcript")
         st.write(text)
 
         st.subheader("English Translation")
         st.write(english_text)
 
-        # Generate English Audio
         audio_path = text_to_speech(english_text)
 
         st.subheader("English Audio")
         st.audio(audio_path)
+
+        with open(audio_path, "rb") as file:
+            st.download_button(
+                label="📥 Download English Audio",
+                data=file,
+                file_name="english_audio.mp3",
+                mime="audio/mpeg"
+            )
+
+        end_time = time.time()
+
+        st.success(
+            f"Completed in {end_time - start_time:.2f} seconds"
+        )
